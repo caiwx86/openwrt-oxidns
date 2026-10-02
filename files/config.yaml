@@ -239,14 +239,9 @@ plugins:
   - tag: forward_cn
     type: forward
     args:
-      concurrent: 4                       # 同时向 3 个上游发，取最快正响应
+      concurrent: 3                       # 同时向 3 个上游发，取最快正响应
       response_selection: prefer_positive # 有正响应优先，避免被否定应答"误杀"
       upstreams:
-        # SmartDNS
-        - tag: doh_tencent
-          addr: 127.0.0.1:6053
-          idle_timeout: 30
-          timeout: 3s
         # 腾讯 DoH：dial_addr 写死 IP，防止 DoH 域名递归解析死锁
         - tag: doh_tencent
           addr: https://doh.pub/dns-query
