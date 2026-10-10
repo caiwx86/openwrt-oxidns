@@ -104,6 +104,9 @@ endef
 
 # ---------------------------------------------------------------------------
 # Install
+# files/seed 由 GitHub Actions 根据 files/config.yaml 的 downloads 列表生成，
+# 内含首次启动所需的规则文件（antiad.txt / geosite.dat / geoip.dat 等），
+# 目录结构与 downloads 中的 dir 一致，直接按原路径安装
 # ---------------------------------------------------------------------------
 
 define Package/oxidns/install
@@ -112,6 +115,10 @@ define Package/oxidns/install
 
 	$(INSTALL_DIR) $(1)/etc/oxidns
 	$(INSTALL_CONF) ./files/config.yaml $(1)/etc/oxidns/config.yaml
+
+	if [ -d ./files/seed ]; then \
+		$(CP) ./files/seed/. $(1)/; \
+	fi
 endef
 
 define Package/oxidns-webui/install

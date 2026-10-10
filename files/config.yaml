@@ -92,6 +92,8 @@ plugins:
       - $geoip_cn
       - $geosite_cn
       - $geosite_no_cn
+      - $geosite_pt
+      - $direct_custom
       - $ms_ncsi_white
 
   # ---------------------------------------------------------------------------
@@ -150,6 +152,40 @@ plugins:
       file: /etc/oxidns/rules/geosite.dat
       selectors:
         - geolocation-!cn
+
+  # PT 站点（geosite 的 category-pt 分类）
+  - tag: geosite_pt
+    type: geosite
+    args:
+      file: /etc/oxidns/rules/geosite.dat
+      selectors:
+        - category-pt
+
+  # 自定义"强制走国内解析"的域名：BT 公共 tracker、BT/磁力站点等
+  # 子域名自动包含；PT 站点没被 category-pt 收录时，往这里加即可
+  - tag: direct_custom
+    type: domain_set
+    args:
+      files: []
+      domains:
+        # --- BT 公共 tracker ---
+        - opentrackr.org
+        - openbittorrent.com
+        - demonii.com
+        - leechers-paradise.org
+        - coppersurfer.tk
+        - torrent.eu.org
+        - tiny-vps.com
+        - stealth.si
+        # --- BT / 动漫资源站 ---
+        - nyaa.si
+        - dmhy.org
+        - mikanani.me
+        - mikanime.tv
+        - bangumi.moe
+        - acg.rip
+        # --- 你自己的 PT 站点域名（示例，按需添加）---
+        # - example-pt.com
 
   - tag: ms_ncsi_white
     type: domain_set
@@ -326,6 +362,12 @@ plugins:
 
       - matches: qname $ms_ncsi_white     # 4) NCSI → 国内序列
         exec: goto ncsi_seq
+
+      # 4.5) PT / BT 站点 → 国内序列（放在广告规则之前，避免 tracker 被拦截规则误杀）
+      - matches: qname $geosite_pt
+        exec: goto local_seq
+      - matches: qname $direct_custom
+        exec: goto local_seq
 
       - matches: qname $ad_rules          # 5) 广告 → 黑洞
         exec: $ad_blackhole
